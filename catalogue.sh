@@ -8,7 +8,7 @@ N="\e[0m"
 
 LOGS_FOLDER="/var/log/shell-roboshop"
 SCRIPT_NAME=$( echo $0 | cut -d "." -f1 )
-SCRIPT_DIR=$pwd
+SCRIPT_DIR=$PWD
 MONGODB_HOST=mongodb.devsaws.icu
 SCRIPT_DIR=$pwd
 LOG_FILE="$LOGS_FOLDER/$SCRIPT_NAME.log"
@@ -28,7 +28,7 @@ VALIDATE(){
     echo -e "$2 ..... $R Error $N" | tee -a $LOG_FILE
     exit 1
     else 
-    echo -e "#2 ..... $G Success $N" | tee -a $LOG_FILE
+    echo -e "$2 ..... $G Success $N" | tee -a $LOG_FILE
     fi
 
 
