@@ -10,7 +10,6 @@ LOGS_FOLDER="/var/log/shell-roboshop"
 SCRIPT_NAME=$( echo $0 | cut -d "." -f1 )
 SCRIPT_DIR=$PWD
 MONGODB_HOST=mongodb.devsaws.icu
-SCRIPT_DIR=$pwd
 LOG_FILE="$LOGS_FOLDER/$SCRIPT_NAME.log"
 
 mkdir -p $LOGS_FOLDER
@@ -68,7 +67,7 @@ VALIDATE $? "file unzipping from temp to app directory"
 npm install &>>$LOG_FILE
 VALIDATE $? "installing dependencys"
 
-cp $SCRIPT_DIR/catalogue.service /etc/systemd/system/catalogue.service ### call SCRIPT_DIR before catalogue.service .........................
+cp $SCRIPT_DIR/catalogue.service /etc/systemd/system/catalogue.service 
 VALIDATE $? "servicre code from service.sh"
 
 systemctl daemon-reload
@@ -81,8 +80,7 @@ systemctl start catalogue
 VALIDATE $? "service start"
 
 
-cp $SCRIPT_DIR/mongo.repo /etc/yum.repos.d/mongo.repo  ### call SCRIPT_DIR before mongo.repo ........................................
-VALIDATE $? "copy mongo repo"
+cp $SCRIPT_DIR/mongo.repo /etc/yum.repos.d/mongo.repo 
 
 dnf install mongodb-mongosh -y &>>$LOG_FILE
 VALIDATE $? "install mongdb client"
