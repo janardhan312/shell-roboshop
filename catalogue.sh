@@ -40,7 +40,7 @@ VALIDATE $? "enable nodejs:20"
 dnf install nodejs -y &>>$LOG_FILE
 VALIDATE $? "finally installing nodejs"
 
-id roboshop     ################................
+id roboshop     ################........................................................................................................
 if [$? -ne 0]; then
 useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop &>>$LOG_FILE 
 VALIDATE $? "creating user"
@@ -57,7 +57,7 @@ VALIDATE $? "downloading code into temp"
 cd /app 
 VALIDATE $? "changing to app directory"
 
-rm -rf /app/* #########..................................
+rm -rf /app/* #########..................................................................................
 VALIDATE "removing exist code"
 
 unzip /tmp/catalogue.zip &>>$LOG_FILE
@@ -67,7 +67,7 @@ VALIDATE $? "file unzipping from temp to app directory"
 npm install &>>$LOG_FILE
 VALIDATE $? "installing dependencys"
 
-cp $SCRIPT_DIR/catalogue.service /etc/systemd/system/catalogue.service 
+cp $SCRIPT_DIR/catalogue.service /etc/systemd/system/catalogue.service  ###################...................................
 VALIDATE $? "servicre code from service.sh"
 
 systemctl daemon-reload
@@ -80,7 +80,7 @@ systemctl start catalogue
 VALIDATE $? "service start"
 
 
-cp $SCRIPT_DIR/mongo.repo /etc/yum.repos.d/mongo.repo 
+cp $SCRIPT_DIR/mongo.repo /etc/yum.repos.d/mongo.repo  ################......................................
 
 dnf install mongodb-mongosh -y &>>$LOG_FILE
 VALIDATE $? "install mongdb client"
