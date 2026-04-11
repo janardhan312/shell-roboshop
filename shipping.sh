@@ -9,7 +9,6 @@ N="\e[0m"
 LOGS_FOLDER="/var/log/shell-roboshop"
 SCRIPT_NAME=$( echo $0 | cut -d "." -f1 )
 SCRIPT_DIR=$PWD
-MONGODB_HOST=mongodb.devaws.icu
 LOG_FILE="$LOGS_FOLDER/$SCRIPT_NAME.log"
 MYSQL_HOST=mysql.devaws.icu
 
@@ -78,14 +77,10 @@ VALIDATE $? "service enable"
 dnf install mysql -y 
 
 
-mysql -h $MYSQL_HOST -uroot -pRoboShop@1 -e 'use mysql'
-if [ $? -ne 0 ]; then
-    mysql -h $MYSQL_HOST -uroot -pRoboShop@1 < /app/db/schema.sql
-    mysql -h $MYSQL_HOST -uroot -pRoboShop@1 < /app/db/app-user.sql 
-    mysql -h $MYSQL_HOST -uroot -pRoboShop@1 < /app/db/master-data.sql
-else 
-    echo -e "Skipping data is alredy installed.... $Y Skipping $N"
-fi
+mysql -h $MYSQL_HOST -uroot -pRoboShop@1 < /app/db/schema.sql
+mysql -h $MYSQL_HOST -uroot -pRoboShop@1 < /app/db/app-user.sql 
+mysql -h $MYSQL_HOST -uroot -pRoboShop@1 < /app/db/master-data.sql
+
 
 
 systemctl restart shipping
