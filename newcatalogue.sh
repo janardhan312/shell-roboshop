@@ -39,9 +39,14 @@ VALIDATE $? "enable nodejs:20"
 dnf install nodejs -y &>>$LOG_FILE
 VALIDATE $? "finally installing nodejs"
 
-useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop &>>$LOG_FILE 
-VALIDATE $? "creating user"
 
+id roboshop &>>$LOG_FILE
+if [$? -ne 0]; then
+    useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop &>>$LOG_FILE 
+    VALIDATE $? "creating user"
+else 
+    echo -e "User already exist ----- $Y Skipping $N"
+fi
 
 mkdir -p /app 
 VALIDATE $? "creating directory"
