@@ -30,22 +30,22 @@ VALIDATE(){
     fi
 }
 
-dnf module disable nginx -y
+dnf module disable nginx -y &>>$LOG_FILE
 VALIDATE $? "Disable nginx"
 
-dnf module enable nginx:1.24 -y
+dnf module enable nginx:1.24 -y &>>$LOG_FILE
 VALIDATE $? "new version enable nginx"
 
-dnf install nginx -y
+dnf install nginx -y &>>$LOG_FILE
 VALIDATE $? "finally installing nginx"
 
-systemctl enable nginx 
+systemctl enable nginx &>>$LOG_FILE
 VALIDATE $? "enable nginx"
 
-systemctl start nginx 
+systemctl start nginx &>>$LOG_FILE
 VALIDATE $? "start nginx"
 
-rm -rf /usr/share/nginx/html/* 
+rm -rf /usr/share/nginx/html/* &>>$LOG_FILE
 VALIDATE $? "remove old code nginx"
 
 curl -o /tmp/frontend.zip https://roboshop-artifacts.s3.amazonaws.com/frontend-v3.zip &>>$LOG_FILE
@@ -61,5 +61,16 @@ rm -rf /etc/nginx/nginx.conf
 cp $SCRIPT_DIR/nginx.conf /etc/nginx/nginx.conf
 VALIDATE $? "copy code from conf nginx service"
 
-systemctl restart frontend
+systemctl restart frontend &>>$LOG_FILE
 VALIDATE $? "restart service"
+
+systemctl enable firewalld &>>$LOG_FILE
+systemctl start firewalld &>>$LOG_FILE
+
+firewall-cmd --permanent --add-port=8080/tcp &>>$LOG_FILE
+firewall-cmd --reload &>>$LOG_FILE
+VALIDATE $? "Opening port 8080"
+
+# ✅ Verify port
+ss -lntp | grep 8080 &>>$LOG_FILE
+VALIDATE $? "Port 8080 is listening"
