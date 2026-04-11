@@ -42,8 +42,16 @@ VALIDATE $? "enable rabbitmq"
 systemctl start rabbitmq-server
 VALIDATE $? "enable rabbitmq"
 
-rabbitmqctl add_user roboshop roboshop123
-VALIDATE $? "user adding rabbitmq"
+
+
+if id roboshop &>/dev/null; then
+    echo -e "User already exists ----- $Y Skipping $N"
+else
+   rabbitmqctl add_user roboshop roboshop123
+   VALIDATE $? "user adding rabbitmq"
+fi
+
+
 
 rabbitmqctl set_permissions -p / roboshop ".*" ".*" ".*"
 VALIDATE $? "setting permissions "
