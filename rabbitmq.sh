@@ -3,7 +3,7 @@
 USERID=$(id -u)
 R="\e[31m"
 G="\e[32m"
-y="\e[33m"
+Y="\e[33m"
 N="\e[0m"
 
 LOGS_FOLDER="/var/log/shell-roboshop"
@@ -26,32 +26,28 @@ VALIDATE(){
     else
         echo -e "$2 .... $G success $N"  | tee -a $LOG_FILE
     fi
-
 }
 
 cp $SCRIPT_DIR/rabbitmq.repo /etc/yum.repos.d/rabbitmq.repo
 VALIDATE $? "Adding rabbitmq Repo"
 
-
 dnf install rabbitmq-server -y
 VALIDATE $? "Installing rabbitmq"
 
 systemctl enable rabbitmq-server
-VALIDATE $? "enable rabbitmq"
+VALIDATE $? "Enabling rabbitmq"
 
 systemctl start rabbitmq-server
-VALIDATE $? "enable rabbitmq"
+VALIDATE $? "Starting rabbitmq"
 
-
-
-if id roboshop &>/dev/null; then
-    echo -e "User already exists ----- $Y Skipping $N"
+# ✅ Correct check for RabbitMQ user
+rabbitmqctl list_users | grep -w roboshop &>/dev/null
+if [ $? -ne 0 ]; then
+    rabbitmqctl add_user roboshop roboshop123
+    VALIDATE $? "Adding RabbitMQ user"
 else
-   rabbitmqctl add_user roboshop roboshop123
-   VALIDATE $? "user adding rabbitmq"
+    echo -e "RabbitMQ user already exists ----- $Y Skipping $N" | tee -a $LOG_FILE
 fi
 
-
-
 rabbitmqctl set_permissions -p / roboshop ".*" ".*" ".*"
-VALIDATE $? "setting permissions "
+VALIDATE $? "Setting permissions"
