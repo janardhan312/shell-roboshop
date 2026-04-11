@@ -10,9 +10,7 @@ LOGS_FOLDER="/var/log/shell-roboshop"
 SCRIPT_NAME=$( echo $0 | cut -d "." -f1 )
 SCRIPT_DIR=$PWD
 LOG_FILE="$LOGS_FOLDER/$SCRIPT_NAME.log"
-
 mkdir -p $LOGS_FOLDER
-echo "script execure time $(date)" | tee -a $LOG_FILE
 
 if [ $USERID -ne 0 ]; then
     echo "Kindly run wih root user"
@@ -45,21 +43,15 @@ VALIDATE $? "enable nginx"
 systemctl start nginx &>>$LOG_FILE
 VALIDATE $? "start nginx"
 
-rm -rf /usr/share/nginx/html/* &>>$LOG_FILE
-VALIDATE $? "remove old code nginx"
-
+rm -rf /usr/share/nginx/html/* 
 curl -o /tmp/frontend.zip https://roboshop-artifacts.s3.amazonaws.com/frontend-v3.zip &>>$LOG_FILE
-VALIDATE $? "downloading code into temp"
-
-
 cd /usr/share/nginx/html 
 unzip /tmp/frontend.zip
 VALIDATE $? "downloading front end code"
 
 rm -rf /etc/nginx/nginx.conf
-
 cp $SCRIPT_DIR/nginx.conf /etc/nginx/nginx.conf
 VALIDATE $? "copy code from conf nginx service"
 
-systemctl restart nginx &>>$LOG_FILE
+systemctl restart nginx 
 VALIDATE $? "restart service"
