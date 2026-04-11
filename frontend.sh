@@ -61,7 +61,7 @@ rm -rf /etc/nginx/nginx.conf
 cp $SCRIPT_DIR/nginx.conf /etc/nginx/nginx.conf
 VALIDATE $? "copy code from conf nginx service"
 
-systemctl restart frontend &>>$LOG_FILE
+systemctl restart nginx &>>$LOG_FILE
 VALIDATE $? "restart service"
 
 systemctl enable firewalld &>>$LOG_FILE
