@@ -10,81 +10,102 @@ LOGS_FOLDER="/var/log/shell-roboshop"
 SCRIPT_NAME=$( echo $0 | cut -d "." -f1 )
 SCRIPT_DIR=$PWD
 LOG_FILE="$LOGS_FOLDER/$SCRIPT_NAME.log"
+MYSQL_HOST=mysql.devaws.icu
 
 mkdir -p $LOGS_FOLDER
-echo "script execure time $(date)" | tee -a $LOG_FILE
+echo "script execution time $(date)" | tee -a $LOG_FILE
 
 if [ $USERID -ne 0 ]; then
-    echo "Kindly run wih root user"
+    echo "Kindly run with root user"
     exit 1
-else 
-    echo "sucess" 
 fi
 
 VALIDATE(){
     if [ $1 -ne 0 ]; then
-        echo -e "$2 ..... $R Error $N" | tee -a $LOG_FILE
+        echo -e "$2 ..... $R FAILED $N" | tee -a $LOG_FILE
         exit 1
     else 
-        echo -e "$2 ..... $G Success $N" | tee -a $LOG_FILE
+        echo -e "$2 ..... $G SUCCESS $N" | tee -a $LOG_FILE
     fi
 }
 
+# ✅ Install Java (MANDATORY)
+dnf install java-17-openjdk -y &>>$LOG_FILE
+VALIDATE $? "Installing Java"
+
+# ✅ Install Maven
 dnf install maven -y &>>$LOG_FILE
-VALIDATE $? "Disable nodejs"
+VALIDATE $? "Installing Maven"
 
-
+# ✅ Create user
 if id roboshop &>/dev/null; then
     echo -e "User already exists ----- $Y Skipping $N"
 else
     useradd --system --home /app --shell /sbin/nologin \
     --comment "roboshop system user" roboshop &>>$LOG_FILE
-
     VALIDATE $? "Creating user"
 fi
 
+# ✅ App setup
 mkdir -p /app 
-VALIDATE $? "creating directory"
+VALIDATE $? "Creating directory"
 
 curl -o /tmp/shipping.zip https://roboshop-artifacts.s3.amazonaws.com/shipping-v3.zip &>>$LOG_FILE
-VALIDATE $? "downloading code into temp"
+VALIDATE $? "Downloading code"
 
 cd /app 
-VALIDATE $? "changing to app directory"
-
-rm -rf /app/* 
-VALIDATE $? "removing old code"
+rm -rf /app/*
+VALIDATE $? "Cleaning old code"
 
 unzip /tmp/shipping.zip &>>$LOG_FILE
-VALIDATE $? "file unzipping from temp to app directory"
+VALIDATE $? "Unzipping code"
 
 mvn clean package &>>$LOG_FILE
-VALIDATE $? "installing dependencys"
+VALIDATE $? "Building application"
 
 mv target/shipping-1.0.jar shipping.jar
-VALIDATE $? "Target file"
+VALIDATE $? "Renaming jar"
 
+# ✅ Service setup
 cp $SCRIPT_DIR/shipping.service /etc/systemd/system/shipping.service
-VALIDATE $? "servicre code from service"
+VALIDATE $? "Copying service file"
 
 systemctl daemon-reload
-VALIDATE $? "system reload"
+VALIDATE $? "Daemon reload"
 
 systemctl enable shipping &>>$LOG_FILE
-VALIDATE $? "service enable"
+VALIDATE $? "Enabling service"
 
-dnf install mysql -y 
-VALIDATE $? "installing mysql"
+# ✅ Install MySQL client
+dnf install mysql -y &>>$LOG_FILE
+VALIDATE $? "Installing MySQL client"
 
+# ✅ Load DB schema (only if needed)
+mysql -h $MYSQL_HOST -uroot -pRoboShop@1 -e 'use mysql' &>>$LOG_FILE
+if [ $? -ne 0 ]; then
+    mysql -h $MYSQL_HOST -uroot -pRoboShop@1 < /app/db/schema.sql
+    mysql -h $MYSQL_HOST -uroot -pRoboShop@1 < /app/db/app-user.sql 
+    mysql -h $MYSQL_HOST -uroot -pRoboShop@1 < /app/db/master-data.sql
+    VALIDATE $? "Loading DB schema"
+else 
+    echo -e "DB already exists ----- $Y Skipping $N"
+fi
 
-mysql -h mysql.devaws.icu -uroot -pRoboShop@1 < /app/db/schema.sql
-VALIDATE $? "schema" 
-
-mysql -h mysql.devaws.icu -uroot -pRoboShop@1 < /app/db/app-user.sql 
-VALIDATE $? "app user"
-
-mysql -h mysql.devaws.icu -uroot -pRoboShop@1 < /app/db/master-data.sql
-VALIDATE $? "master data"
-
+# ✅ Start service
 systemctl restart shipping
-VALIDATE $? "service start"
+sleep 5
+
+systemctl is-active shipping &>>$LOG_FILE
+VALIDATE $? "Shipping service running"
+
+# ✅ Open port 8080 in firewall (if firewalld installed)
+systemctl enable firewalld &>>$LOG_FILE
+systemctl start firewalld &>>$LOG_FILE
+
+firewall-cmd --permanent --add-port=8080/tcp &>>$LOG_FILE
+firewall-cmd --reload &>>$LOG_FILE
+VALIDATE $? "Opening port 8080"
+
+# ✅ Verify port
+ss -lntp | grep 8080 &>>$LOG_FILE
+VALIDATE $? "Port 8080 is listening"
