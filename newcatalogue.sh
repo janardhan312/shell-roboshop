@@ -84,7 +84,7 @@ VALIDATE $? "Copy mongo repo"
 dnf install mongodb-mongosh -y &>>$LOG_FILE
 VALIDATE $? "install mongdb client"
 
-INDEX=$(monosh mongodb.devaws.icu --quiet --eval "db.getMongo().getDBNames().indexOf('catalogue')")
+INDEX=$(mongosh mongodb.devaws.icu --quiet --eval "db.getMongo().getDBNames().indexOf('catalogue')")
 if [ $INDEX -le 0 ]; then 
     mongosh --host mongodb.devaws.icu </app/db/master-data.js &>>$LOG_FILE   
     VALIDATE $? "loading products"
