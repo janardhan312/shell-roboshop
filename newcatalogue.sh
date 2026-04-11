@@ -89,6 +89,7 @@ if [ $INDEX -le 0 ]; then
     mongosh --host mongodb.devaws.icu </app/db/master-data.js &>>$LOG_FILE   
     VALIDATE $? "loading products"
 else echo -e "products alredy loaded -----$Y Skipping $N"
+fi
 
 systemctl restart catalogue
 VALIDATE $? "restart service"
