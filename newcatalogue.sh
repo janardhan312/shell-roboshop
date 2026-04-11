@@ -30,7 +30,6 @@ VALIDATE(){
     echo -e "$2 ..... $G Success $N" | tee -a $LOG_FILE
     fi
 }
-
 dnf module disable nodejs -y &>>$LOG_FILE
 VALIDATE $? "Disable nodejs"
 
@@ -48,6 +47,7 @@ else
 echo -e "User already exist ----- $Y Skipping $N"
 fi
 
+
 mkdir -p /app 
 VALIDATE $? "creating directory"
 
@@ -57,18 +57,17 @@ VALIDATE $? "downloading code into temp"
 cd /app 
 VALIDATE $? "changing to app directory"
 
-rm -rf /app/* #########..................................................................................
-VALIDATE "removing exist code"
+rm -rf /app/* 
+VALIDATE $? "removing old code"
 
 unzip /tmp/catalogue.zip &>>$LOG_FILE
 VALIDATE $? "file unzipping from temp to app directory"
 
-##cd /app 
 npm install &>>$LOG_FILE
 VALIDATE $? "installing dependencys"
 
-cp $SCRIPT_DIR/catalogue.service /etc/systemd/system/catalogue.service  ###################...................................
-VALIDATE $? "servicre code from service.sh"
+cp $SCRIPT_DIR/catalogue.service /etc/systemd/system/catalogue.service
+VALIDATE $? "servicre code from service"
 
 systemctl daemon-reload
 VALIDATE $? "system reload"
@@ -79,8 +78,8 @@ VALIDATE $? "service enable"
 systemctl start catalogue
 VALIDATE $? "service start"
 
-
-cp $SCRIPT_DIR/mongo.repo /etc/yum.repos.d/mongo.repo  ################......................................
+cp $SCRIPT_DIR/mongo.repo /etc/yum.repos.d/mongo.repo
+VALIDATE $? "Copy mongo repo"
 
 dnf install mongodb-mongosh -y &>>$LOG_FILE
 VALIDATE $? "install mongdb client"
