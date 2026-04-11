@@ -19,7 +19,7 @@ if [ $USERID -ne 0 ]; then
 echo "Kindly run wih root user"
 exit 1
 else 
-echo "sucess" 
+echo "success" 
 fi
 
 VALIDATE(){
