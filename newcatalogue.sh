@@ -16,18 +16,18 @@ mkdir -p $LOGS_FOLDER
 echo "script execure time $(date)" | tee -a $LOG_FILE
 
 if [ $USERID -ne 0 ]; then
-echo "Kindly run wih root user"
-exit 1
+    echo "Kindly run wih root user"
+    exit 1
 else 
-echo "sucess" 
+    echo "sucess" 
 fi
 
 VALIDATE(){
     if [ $1 -ne 0 ]; then
-    echo -e "$2 ..... $R Error $N" | tee -a $LOG_FILE
-    exit 1
+        echo -e "$2 ..... $R Error $N" | tee -a $LOG_FILE
+        exit 1
     else 
-    echo -e "$2 ..... $G Success $N" | tee -a $LOG_FILE
+        echo -e "$2 ..... $G Success $N" | tee -a $LOG_FILE
     fi
 }
 dnf module disable nodejs -y &>>$LOG_FILE
@@ -39,12 +39,12 @@ VALIDATE $? "enable nodejs:20"
 dnf install nodejs -y &>>$LOG_FILE
 VALIDATE $? "finally installing nodejs"
 
-id roboshop
+id roboshop &>>$LOG_FILE
 if [$? -ne 0]; then
     useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop &>>$LOG_FILE 
     VALIDATE $? "creating user"
 else 
-echo -e "User already exist ----- $Y Skipping $N"
+    echo -e "User already exist ----- $Y Skipping $N"
 fi
 
 
