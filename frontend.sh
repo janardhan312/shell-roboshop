@@ -63,14 +63,3 @@ VALIDATE $? "copy code from conf nginx service"
 
 systemctl restart nginx &>>$LOG_FILE
 VALIDATE $? "restart service"
-
-systemctl enable firewalld &>>$LOG_FILE
-systemctl start firewalld &>>$LOG_FILE
-
-firewall-cmd --permanent --add-port=8080/tcp &>>$LOG_FILE
-firewall-cmd --reload &>>$LOG_FILE
-VALIDATE $? "Opening port 8080"
-
-# ✅ Verify port
-ss -lntp | grep 8080 &>>$LOG_FILE
-VALIDATE $? "Port 8080 is listening"
