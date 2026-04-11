@@ -10,7 +10,6 @@ LOGS_FOLDER="/var/log/shell-roboshop"
 SCRIPT_NAME=$( echo $0 | cut -d "." -f1 )
 SCRIPT_DIR=$PWD
 LOG_FILE="$LOGS_FOLDER/$SCRIPT_NAME.log"
-MYSQL_HOST=mysql.devaws.icu
 
 mkdir -p $LOGS_FOLDER
 echo "script execure time $(date)" | tee -a $LOG_FILE
@@ -75,13 +74,17 @@ systemctl enable shipping &>>$LOG_FILE
 VALIDATE $? "service enable"
 
 dnf install mysql -y 
+VALIDATE $? "installing mysql"
 
 
-mysql -h $MYSQL_HOST -uroot -pRoboShop@1 < /app/db/schema.sql
-mysql -h $MYSQL_HOST -uroot -pRoboShop@1 < /app/db/app-user.sql 
-mysql -h $MYSQL_HOST -uroot -pRoboShop@1 < /app/db/master-data.sql
+mysql -h mysql.devaws.icu -uroot -pRoboShop@1 < /app/db/schema.sql
+VALIDATE $? "schema" 
 
+mysql -h mysql.devaws.icu -uroot -pRoboShop@1 < /app/db/app-user.sql 
+VALIDATE $? "app user"
 
+mysql -h mysql.devaws.icu -uroot -pRoboShop@1 < /app/db/master-data.sql
+VALIDATE $? "master data"
 
 systemctl restart shipping
 VALIDATE $? "service start"
